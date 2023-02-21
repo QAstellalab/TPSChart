@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TPS Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <canvas id="tpsChart"></canvas>
+    <script>
+        var tpsData = [];
+        var timestampData = [];
+
+        var web3 = new Web3(new Web3.providers.HttpProvider('https://rpc.astranaut.dev/'));
+
+        async function getNumTransactionsInCurrentBlock() {
+            const blockNumber = await web3.eth.getBlockNumber(); // get current block number
+            const block = await web3.eth.getBlock(blockNumber); // get block by number
+            // get number of transactions in block
+            return block.transactions.length;
+        }
+
+
+        var chartOptions = {
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    time: {
+                        unit: 'second',
+                        displayFormats: {
+                            second: 'HH:mm:ss'
+                        }
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        };
+
+        var chartData = {
+            labels: timestampData,
+            datasets: [{
+                label: 'TPS',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        };
+
+        var chart = new Chart(document.getElementById('tpsChart'), {
+            type: 'line',
+            data: chartData,
+            options: chartOptions
+        });
+        setInterval(function () {
+            // get the new TPS value (replace this with your code)
+
+            // async function getCurrentBlockNumber() {
+            //     const blockNumber = await web3.eth.getBlockNumber(); // get current block number
+            //     return blockNumber;
+            // }
+
+            Promise.all([getNumTransactionsInCurrentBlock()]).then(res => {
+                console.log(res[0]);
+                var timestamp = new Date();
+
+                // add 7 hours to the timestamp to convert to UTC+7
+                timestamp.setHours(timestamp.getHours() + 7);
+
+                // format the timestamp as a string in UTC+7 format
+                var timestampString = timestamp.toISOString().replace('Z', '+07:00');
+                const tps = res[0] / 3;
+                // add the new TPS and timestamp values to the data arrays
+                tpsData.push(tps);
+                timestampData.push(timestampString);
+
+                // redraw the chart with the updated data
+                console.log(tpsData)
+                chart.data.datasets[0].data = tpsData
+                chart.update();
+                chart = new Chart(document.getElementById('tpsChart'), {
+                    type: 'line',
+                    data: chartData,
+                    options: chartOptions
+                });
+            })
+            // create a new Date object with the current timestamp
+        }, 5000);
+
+
+    </script>
+</body>
+
+</html>
