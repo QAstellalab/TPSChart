@@ -29,7 +29,7 @@
             let web3, blockNumber, block;
             while (true) {
                 try {
-                    web3 = getRandomRPC();
+                    web3 = await getRandomRPC();
                     blockNumber = await web3.eth.getBlockNumber();
                     block = await web3.eth.getBlock(blockNumber);
                     break;
