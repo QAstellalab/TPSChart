@@ -12,10 +12,21 @@
     <script>
         var tpsData = [];
         var timestampData = [];
+        function getRandomRPC() {
+            const rpcUrls = [
+                'https://rpc.astranaut.dev/',
+                'http://206.189.158.191:8545',
+                'http://159.89.202.43:8545'
+            ];
 
-        var web3 = new Web3(new Web3.providers.HttpProvider('https://rpc.astranaut.dev/'));
+            const randomIndex = Math.floor(Math.random() * rpcUrls.length);
+            const randomRPC = rpcUrls[randomIndex];
+            //console.log('randomRPC: ',randomRPC);
+            return new Web3(new Web3.providers.HttpProvider(randomRPC));
+        }
 
         async function getNumTransactionsInCurrentBlock() {
+            const web3 = getRandomRPC();
             const blockNumber = await web3.eth.getBlockNumber(); // get current block number
             const block = await web3.eth.getBlock(blockNumber); // get block by number
             // get number of transactions in block
