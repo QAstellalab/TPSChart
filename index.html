@@ -25,14 +25,20 @@
             return new Web3(new Web3.providers.HttpProvider(randomRPC));
         }
 
-        async function getNumTransactionsInCurrentBlock() {
-            const web3 = getRandomRPC();
-            const blockNumber = await web3.eth.getBlockNumber(); // get current block number
-            const block = await web3.eth.getBlock(blockNumber); // get block by number
-            // get number of transactions in block
+           async function getNumTransactionsInCurrentBlock() {
+            let web3, blockNumber, block;
+            while (true) {
+                try {
+                    web3 = getRandomRPC();
+                    blockNumber = await web3.eth.getBlockNumber();
+                    block = await web3.eth.getBlock(blockNumber);
+                    break;
+                } catch (err) {
+                    console.error(`Error while fetching block data: ${err.message}`);
+                }
+            }
             return block.transactions.length;
         }
-
 
         var chartOptions = {
             scales: {
