@@ -9,9 +9,10 @@
 
 <body>
     <canvas id="tpsChart"></canvas>
-    <script>
+    <script async>
         var tpsData = [];
         var timestampData = [];
+
         function getRandomRPC() {
             const rpcUrls = [
                 'https://rpc.astranaut.dev/',
@@ -25,20 +26,32 @@
             return new Web3(new Web3.providers.HttpProvider(randomRPC));
         }
 
-           async function getNumTransactionsInCurrentBlock() {
-            let web3, blockNumber, block;
+        async function getFirstBlockNumber() {
+            let firstBlockNumber, web3
+            web3 = getRandomRPC();
             while (true) {
                 try {
-                    web3 = await getRandomRPC();
-                    blockNumber = await web3.eth.getBlockNumber();
-                    block = await web3.eth.getBlock(blockNumber);
+                    firstBlockNumber = await web3.eth.getBlockNumber();
                     break;
                 } catch (err) {
                     console.error(`Error while fetching block data: ${err.message}`);
+                    throw err;
                 }
             }
-            return block.transactions.length;
+            return firstBlockNumber;
         }
+
+
+        async function getNumberTransactionsInBlock(blockNumber) {
+            let web3 = getRandomRPC();
+            try {
+                let block = await web3.eth.getBlock(blockNumber);
+                return block.transactions.length;
+            } catch (err) {
+                throw err
+            }
+        }
+
 
         var chartOptions = {
             scales: {
@@ -64,7 +77,9 @@
             datasets: [{
                 label: 'TPS',
                 data: [],
-                borderColor: 'blue',
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                color:'#ffff',
+                borderColor: 'rgba(71, 38, 184, 0.8)',
                 fill: false
             }]
         };
@@ -74,40 +89,44 @@
             data: chartData,
             options: chartOptions
         });
-        setInterval(function () {
-            // get the new TPS value (replace this with your code)
 
-            // async function getCurrentBlockNumber() {
-            //     const blockNumber = await web3.eth.getBlockNumber(); // get current block number
-            //     return blockNumber;
-            // }
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-            Promise.all([getNumTransactionsInCurrentBlock()]).then(res => {
-                console.log(res[0]);
-                var timestamp = new Date();
+        getFirstBlockNumber().then(async function (firstBlockNumber) {
+            console.log('firstBlockNumber: ', firstBlockNumber);
+            let i = firstBlockNumber
+            while (true) {
+                Promise.all([getNumberTransactionsInBlock(i)]).then(res => {
+                    console.log(i);
+                    console.log(res[0]);
+                    var timestamp = new Date();
 
-                // add 7 hours to the timestamp to convert to UTC+7
-                timestamp.setHours(timestamp.getHours() + 7);
+                    // add 7 hours to the timestamp to convert to UTC+7
+                    timestamp.setHours(timestamp.getHours() + 7);
 
-                // format the timestamp as a string in UTC+7 format
-                var timestampString = timestamp.toISOString().replace('Z', '+07:00');
-                const tps = res[0] / 3;
-                // add the new TPS and timestamp values to the data arrays
-                tpsData.push(tps);
-                timestampData.push(timestampString);
+                    // format the timestamp as a string in UTC+7 format
+                    var timestampString = timestamp.toISOString().replace('Z', ' at Block: ' + i);
+                    const tps = res[0] / 3;
+                    // add the new TPS and timestamp values to the data arrays
+                    // tpsData.push(tps);
+                    timestampData.push(timestampString);
 
-                // redraw the chart with the updated data
-                console.log(tpsData)
-                chart.data.datasets[0].data = tpsData
-                chart.update();
-                chart = new Chart(document.getElementById('tpsChart'), {
-                    type: 'line',
-                    data: chartData,
-                    options: chartOptions
-                });
-            })
-            // create a new Date object with the current timestamp
-        }, 5000);
+                    // redraw the chart with the updated data
+                    console.log(tpsData)
+                    chart.data.datasets[0].data.push(tps)
+                    if (chart.data.labels.length > 30) {
+                        chart.data.labels.shift();
+                        chart.data.datasets[0].data.shift();
+                    }
+                    chart.update();
+                    i++
+                }).catch(err => {
+                    console.log(err)
+                })
+                await delay(2000)
+            }
+        })
+            .catch(err => { console.log(err) })
 
 
     </script>
