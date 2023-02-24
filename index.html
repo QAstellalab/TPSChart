@@ -5,6 +5,7 @@
     <title>TPS Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.3.6/dist/web3.min.js"></script>
+    <script src="./randomRPC.js"></script>
 </head>
 
 <body>
@@ -13,18 +14,17 @@
         var tpsData = [];
         var timestampData = [];
 
-        function getRandomRPC() {
-            const rpcUrls = [
-                'https://rpc.astranaut.dev/',
-                'http://206.189.158.191:8545',
-                'http://159.89.202.43:8545'
-            ];
-
-            const randomIndex = Math.floor(Math.random() * rpcUrls.length);
-            const randomRPC = rpcUrls[randomIndex];
-            //console.log('randomRPC: ',randomRPC);
-            return new Web3(new Web3.providers.HttpProvider(randomRPC));
-        }
+        // function getRandomRPC() {
+        //     const rpcUrls = [
+        //         'https://rpc.astranaut.dev/',
+        //         'http://206.189.158.191:8545',
+        //         'http://159.89.202.43:8545'
+        //     ];
+        //     const randomIndex = Math.floor(Math.random() * rpcUrls.length);
+        //     const randomRPC = rpcUrls[randomIndex];
+        //     //console.log('randomRPC: ',randomRPC);
+        //     return new Web3(new Web3.providers.HttpProvider(randomRPC));
+        // }
 
         async function getFirstBlockNumber() {
             let firstBlockNumber, web3
