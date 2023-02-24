@@ -93,6 +93,7 @@
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
         getFirstBlockNumber().then(async function (firstBlockNumber) {
+            //firstBlockNumber=1070402-10;
             console.log('firstBlockNumber: ', firstBlockNumber);
             let i = firstBlockNumber
             while (true) {
@@ -114,14 +115,14 @@
                     // redraw the chart with the updated data
                     console.log(tpsData)
                     chart.data.datasets[0].data.push(tps)
-                    if (chart.data.labels.length > 30) {
+                    if (chart.data.labels.length > 50) {
                         chart.data.labels.shift();
                         chart.data.datasets[0].data.shift();
                     }
                     chart.update();
                     i++
                 }).catch(err => {
-                    console.log(err)
+                    console.log('Wait for the next block to be mined')
                 })
                 await delay(1000)
             }
