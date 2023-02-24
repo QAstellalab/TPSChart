@@ -28,9 +28,9 @@
 
         async function getFirstBlockNumber() {
             let firstBlockNumber, web3
-            web3 = getRandomRPC();
             while (true) {
                 try {
+                    web3 = getRandomRPC();
                     firstBlockNumber = await web3.eth.getBlockNumber();
                     break;
                 } catch (err) {
